@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div>&nbsp;</div>
+
+        {% if request.user.is_authenticated %}
+            <h6>Create Notifications:</h6>
+            <div class="col-12">
+                <form class="ri-inline" action="/" method="POST">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        value={{True}}
+                        name="paymentsuccess"
+                        class="btn btn-outline-success btn-sm">
+                        Payment Success
+                    </button>
+                </form>
+
+                <form class="ri-inline" action="/" method="POST">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        value={{True}}
+                        name="paymentfailure"
+                        class="btn btn-outline-danger btn-sm">
+                        Payment Failure
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <h6>Sign in or create user first to raise notifications</h6>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

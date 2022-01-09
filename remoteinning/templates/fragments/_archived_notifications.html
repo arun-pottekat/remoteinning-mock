@@ -1,0 +1,32 @@
+<section class="ri-archivednotification-container">
+    <h5>Archived Notifications</h5>
+    {% if deleted_notifications|length == 0 %}
+        <h6>No archived notifications</h6>
+    {% endif %}
+
+    <div class="accordion" id="ri-archivednotifications">
+        {% for notification in deleted_notifications %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-{{ notification.id }}" aria-expanded="false" aria-controls="flush-{{ notification.id }}">
+                <span class="ri-semibold-font">{{ notification.header }}</span>
+                </button>
+            </h2>
+            <div id="flush-{{ notification.id }}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#ri-archivednotifications">
+                <div class="accordion-body">
+                    <h6 class="ri-regular-font">{{ notification.message }}</h6>
+                    <form class="ri-inline" action="/resources/notifications/" method="GET">
+                        <button
+                            type="submit"
+                            name="restorenotification"
+                            value={{ notification.id }}
+                            class="btn btn-outline-primary btn-sm">
+                            Restore Notification
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>

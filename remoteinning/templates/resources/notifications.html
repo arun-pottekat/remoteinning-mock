@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>&nbsp;</div>
+<div class="container ri-notification-container">
+    <div class="row">
+        <div class="col-12">
+            <h5>
+                Notifications for {{request.user.username}}:
+                {% if notification_list|length > 0 %}
+                <form class="ri-inline" action="/resources/notifications/" method="GET">
+                    &emsp;
+                    <button
+                        type="submit"
+                        name="markall"
+                        value={{True}}
+                        class="btn btn-outline-success btn-sm">
+                        Mark all as read
+                    </button>
+                </form>
+                {% endif %}
+            </h5>
+            {% if notification_list|length == 0 %}
+                <h6>No new notifications</h6>
+            {% endif %}
+        </div>
+    </div>
+
+    {% for notification in notification_list %}
+        <div class="container col-12 ri-notification-list">
+            <div class="row ri-card">
+                <div class="col-10">
+                    <span class="ri-semibold-font">{{notification.header}}</span>
+                </div>
+
+                <div class="col-2">
+                    {% if notification.mark_read %}
+                        <form class="ri-inline" action="/resources/notifications/" method="GET">
+                            <button
+                                type="submit"
+                                name="markunread"
+                                value={{notification.id}}
+                                class="btn btn-outline-dark btn-sm">
+                                Mark as unread
+                            </button>
+                        </form>
+                    {% else %}
+                        <form class="ri-inline" action="/resources/notifications/" method="GET">
+                            <button
+                                type="submit"
+                                name="markread"
+                                value={{notification.id}}
+                                class="btn btn-outline-success btn-sm">
+                                Mark as read
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    <form class="ri-inline" action="/resources/notifications/" method="POST">
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            name="delete"
+                            value={{notification.id}}
+                            class="btn btn-outline-danger btn-sm">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+                <div class="col-12">
+                    <span class="ri-regular-font">{{notification.message}}</span>
+                </div>
+
+                <div class="col-12">
+                    <span class="ri-regular-font">From:
+                        <span class="ri-semibold-font">{{notification.from_user.username}} </span>on {{notification.created_on}}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">&nbsp;</div>
+    {% endfor %}
+
+    <hr />
+    <div class="col-12">&nbsp;</div>
+
+    {% include "fragments/_archived_notifications.html" with deleted_notifications=deleted_notifications %}
+    <div class="col-12">&nbsp;</div>
+</div>
+{% endblock content %}
