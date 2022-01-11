@@ -1,7 +1,7 @@
 from resources import models as resource_models
 
 
-def createNotification(notification_data):
+def create_notification(notification_data):
     try:
         notification = resource_models.Notification.objects.create(**notification_data)
         return notification
@@ -9,11 +9,7 @@ def createNotification(notification_data):
         return None
 
 
-def getNotification(notification_id):
-    return resource_models.Notification.objects.get(id=notification_id)
-
-
-def getNotificationsToList(user):
+def get_notifications_to_list(user):
     notifications = resource_models.Notification.objects.filter(
         to_user=user, is_deleted=False
     )
@@ -21,7 +17,7 @@ def getNotificationsToList(user):
     return notifications
 
 
-def getDeletedNotifications(user):
+def get_deleted_notifications(user):
     notifications = resource_models.Notification.objects.filter(
         to_user=user, is_deleted=True
     )

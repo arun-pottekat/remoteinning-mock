@@ -54,12 +54,12 @@ class Notification(models.Model):
             "-created_on",
         ]
 
-    def setNotificationStatus(self, status):
+    def set_notification_status(self, status):
         self.status = status
         self.save()
         return True
 
-    def setNotificationUsers(self, from_user=None, to_user=None):
+    def set_notification_users(self, from_user=None, to_user=None):
         if from_user:
             self.from_user = from_user
 
@@ -69,22 +69,22 @@ class Notification(models.Model):
         self.save()
         return True
 
-    def deleteNotification(self):
+    def delete_notification(self):
         self.is_deleted = True
         self.save()
         return True
 
-    def restoreNotification(self):
+    def restore_notification(self):
         self.is_deleted = False
         self.save()
         return True
 
-    def markNotificationAsRead(self):
+    def mark_notification_as_read(self):
         self.mark_read = True
         self.save()
         return True
 
-    def markNotificationAsUnread(self):
+    def mark_notification_as_unread(self):
         self.mark_read = False
         self.save()
         return True

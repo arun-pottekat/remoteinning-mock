@@ -1,58 +1,118 @@
+from django.contrib import messages
 from django.core import exceptions
-from django.http import HttpResponseNotFound
 from django.shortcuts import render
+from django.views import View
 
 from . import models as resource_models
 from . import utils
 
 
-def notificationList(request):
-    TEMPLATE = "resources/notifications.html"
+class NotificationListView(View):
+    template_name = "resources/notifications.html"
 
-    CONTEXT = {
-        "notification_list": [],
-        "deleted_notifications": [],
-    }
+    def mark_all_read(self, user):
+        notifications = utils.get_notifications_to_list(user=user)
+        for notification in notifications:
+            notification.mark_notification_as_read()
 
-    try:
-        if not request.user.is_authenticated:
-            raise exceptions.PermissionDenied
+        return
+
+    def mark_notification_read(self, request, notification_id):
+        try:
+            notification = resource_models.Notification.objects.get(id=notification_id)
+            notification.mark_notification_as_read()
+        except exceptions.ObjectDoesNotExist:
+            messages.error(request, "Notification not found")
+        except exceptions.MultipleObjectsReturned:
+            messages.error(request, "Oops, could not delete notification")
+            print("Multiple notifications found with same notification id")
+
+        return
+
+    def mark_notification_unread(self, request, notification_id):
+        try:
+            notification = resource_models.Notification.objects.get(id=notification_id)
+            notification.mark_notification_as_unread()
+        except exceptions.ObjectDoesNotExist:
+            messages.error(request, "Notification not found")
+        except exceptions.MultipleObjectsReturned:
+            messages.error(request, "Oops, could not delete notification")
+            print("Multiple notifications found with same notification id")
+
+        return
+
+    def restore_notification(self, request, notification_id):
+        try:
+            notification = resource_models.Notification.objects.get(id=notification_id)
+            notification.restore_notification()
+        except exceptions.ObjectDoesNotExist:
+            messages.error(request, "Notification not found")
+        except exceptions.MultipleObjectsReturned:
+            messages.error(request, "Oops, could not delete notification")
+            print("Multiple notifications found with same notification id")
+
+        return
+
+    def delete_notification(self, request, notification_id):
+        try:
+            notification = resource_models.Notification.objects.get(id=notification_id)
+            notification.delete_notification()
+        except exceptions.ObjectDoesNotExist:
+            messages.error(request, "Notification not found")
+        except exceptions.MultipleObjectsReturned:
+            messages.error(request, "Oops, could not delete notification")
+            print("Multiple notifications found with same notification id")
+
+        return
+
+    def get(self, request):
+        context = {
+            "notification_list": [],
+            "deleted_notifications": [],
+        }
+
+        notification_id = None
 
         if "markall" in request.GET:
-            notifications = utils.getNotificationsToList(user=request.user)
-            for notification in notifications:
-                notification.markNotificationAsRead()
-
-        if "markread" in request.GET:
+            self.mark_all_read(user=request.user)
+        elif "markread" in request.GET:
             notification_id = request.GET["markread"]
-            notification = resource_models.Notification.objects.get(id=notification_id)
-            notification.markNotificationAsRead()
-
-        if "markunread" in request.GET:
+            self.mark_notification_read(
+                request=request, notification_id=notification_id
+            )
+        elif "markunread" in request.GET:
             notification_id = request.GET["markunread"]
-            notification = resource_models.Notification.objects.get(id=notification_id)
-            notification.markNotificationAsUnread()
-
-        if "restorenotification" in request.GET:
+            self.mark_notification_unread(
+                request=request, notification_id=notification_id
+            )
+        elif "restorenotification" in request.GET:
             notification_id = request.GET["restorenotification"]
-            notification = resource_models.Notification.objects.get(id=notification_id)
-            notification.restoreNotification()
+            self.mark_notification_unread(
+                request=request, notification_id=notification_id
+            )
 
-        if request.method == "POST":
-            if "delete" in request.POST:
-                notification_id = request.POST["delete"]
-                notification = resource_models.Notification.objects.get(
-                    id=notification_id
-                )
-                notification.deleteNotification()
+        notification_list = utils.get_notifications_to_list(user=request.user)
+        deleted_notifications = utils.get_deleted_notifications(user=request.user)
 
-        notification_list = utils.getNotificationsToList(user=request.user)
-        deleted_notifications = utils.getDeletedNotifications(user=request.user)
+        context["notification_list"] = notification_list
+        context["deleted_notifications"] = deleted_notifications
 
-        CONTEXT["notification_list"] = notification_list
-        CONTEXT["deleted_notifications"] = deleted_notifications
-    except Exception:
-        print("Permission Denied")
-        return HttpResponseNotFound("Oops, page not found")
+        return render(request, self.template_name, context)
 
-    return render(request, TEMPLATE, CONTEXT)
+    def post(self, request):
+        context = {
+            "notification_list": [],
+            "deleted_notifications": [],
+        }
+
+        if "delete" in request.POST:
+            notification_id = request.POST["delete"]
+            self.delete_notification(request=request, notification_id=notification_id)
+
+        notification_list = utils.get_notifications_to_list(user=request.user)
+        deleted_notifications = utils.get_deleted_notifications(user=request.user)
+
+        context["notification_list"] = notification_list
+        context["deleted_notifications"] = deleted_notifications
+
+        return render(request, self.template_name, context)

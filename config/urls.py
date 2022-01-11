@@ -7,7 +7,7 @@ from django.views import defaults as default_views
 from dashboard import views as dashboard_views
 
 urlpatterns = [
-    path("", dashboard_views.home, name="home"),
+    path("", dashboard_views.HomeView.as_view(), name="home"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
